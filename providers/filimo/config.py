@@ -39,10 +39,19 @@ class FilimoSourceConfig:
     
     def __post_init__(self):
         # Load from environment variables
-        self.sftp_host = os.getenv("FILIMO_SFTP_HOST", "None")
-        self.sftp_username = os.getenv("FILIMO_SFTP_USER", None)
+        self.filimo_data_file = self._get_required_env("FILIMO_DATA_FILE")
+        self.imported_before_file = self._get_required_env("FILIMO_IMPORTED_BEFORE_FILE")
+        self.movie_uid_exclusions_file = self._get_required_env("FILIMO_MOVIE_UID_FILE")
+        self.parent_id_exclusions_file = self._get_required_env("FILIMO_PARENT_ID_FILE")
+        self.imdb_data_file = self._get_required_env("FILIMO_IMDB_DATA_FILE")
+        
+        self.sftp_host = os.getenv("FILIMO_SFTP_HOST")
+        self.sftp_port = int(self._get_required_env("FILIMO_SFTP_PORT"))
+        self.sftp_username = os.getenv("FILIMO_SFTP_USER")
         self.sftp_password = os.getenv("FILIMO_SFTP_PASS")
-        self.metabase_api_url = os.getenv("FILIMO_API_URL", "None")
+        self.sftp_remote_dir = self._get_required_env("FILIMO_SFTP_REMOTE_DIR")
+        
+        self.metabase_api_url = os.getenv("FILIMO_API_URL")
         self.api_key = os.getenv("FILIMO_API_KEY")
 
 
