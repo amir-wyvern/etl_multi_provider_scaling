@@ -215,6 +215,12 @@ monitoring/
 config/secrets/
 secrets/
 
+# Google Cloud Service Account credentials
+credentials.json
+service-account-key.json
+*-service-account.json
+gcp-credentials*.json
+
 # Temporary files
 temp/
 tmp/
