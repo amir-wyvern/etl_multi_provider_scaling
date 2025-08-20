@@ -9,6 +9,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List
 from core.base_pipeline import BaseConfig
+from dotenv import load_dotenv
+
+# Load Filimo-specific environment variables
+load_dotenv('.env.filimo')
 
 
 @dataclass
@@ -34,9 +38,12 @@ class FilimoSourceConfig:
     api_key: str = None
     
     def __post_init__(self):
-        # Load from environment if available
-        self.sftp_password = os.getenv("FILIMO_SFTP_PASS", self.sftp_password)
-        self.api_key = os.getenv("FILIMO_API_KEY", self.api_key)
+        # Load from environment variables
+        self.sftp_host = os.getenv("FILIMO_SFTP_HOST", "None")
+        self.sftp_username = os.getenv("FILIMO_SFTP_USER", None)
+        self.sftp_password = os.getenv("FILIMO_SFTP_PASS")
+        self.metabase_api_url = os.getenv("FILIMO_API_URL", "None")
+        self.api_key = os.getenv("FILIMO_API_KEY")
 
 
 @dataclass
