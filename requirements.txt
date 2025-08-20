@@ -1,0 +1,44 @@
+# Core ETL Framework Dependencies
+pandas>=2.0.0
+requests>=2.28.0
+python-dotenv>=1.0.0
+
+# Data Processing & Validation
+numpy>=1.24.0
+typing-extensions>=4.0.0
+
+# File Handling & I/O
+pathlib2>=2.3.0; python_version<"3.6"
+
+# Optional: SFTP Support (for Filimo provider)
+pysftp==0.2.9
+paramiko<3.0
+
+# Optional: Google Services (for specific providers)
+gspread>=6.0.0
+gspread-dataframe>=4.0.0
+google-auth>=2.20.0
+google-api-python-client>=2.100.0
+
+# Optional: Additional Data Formats
+openpyxl>=3.0.0
+xlsxwriter>=3.0.0
+
+# Optional: API Framework (for future enhancements)
+fastapi>=0.100.0
+uvicorn>=0.20.0
+
+# Optional: Advanced Analytics
+scipy>=1.10.0
+scikit-learn>=1.3.0
+
+# Development Dependencies (optional)
+pytest>=7.0.0
+pytest-cov>=4.0.0
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.0.0
+
+# Documentation (optional)
+mkdocs>=1.5.0
+mkdocs-material>=9.0.0
