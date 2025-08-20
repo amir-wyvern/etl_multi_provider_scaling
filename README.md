@@ -103,7 +103,7 @@ Multi-Provider ETL Framework/
 ### **Installation**
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/amir-wyvern/etl_multi_provider_scaling.git
 cd multi-provider-etl-framework
 
 # Create virtual environment
