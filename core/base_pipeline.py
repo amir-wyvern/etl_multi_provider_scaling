@@ -22,7 +22,7 @@ class BaseConfig:
     provider_version: str = "1.0.0"
     
     # Common paths
-    base_dir: Path = Path("downloads")
+    base_dir: Path = Path("assets")
     
     # Processing options
     continue_on_error: bool = False

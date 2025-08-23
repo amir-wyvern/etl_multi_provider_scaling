@@ -38,21 +38,28 @@ class FilimoSourceConfig:
     api_key: str = None
     
     def __post_init__(self):
-        # Load from environment variables - ALL REQUIRED
+        # Load from environment variables
+        # Data files are always required
         self.filimo_data_file = self._get_required_env("FILIMO_DATA_FILE")
         self.imported_before_file = self._get_required_env("FILIMO_IMPORTED_BEFORE_FILE")
         self.movie_uid_exclusions_file = self._get_required_env("FILIMO_MOVIE_UID_FILE")
         self.parent_id_exclusions_file = self._get_required_env("FILIMO_PARENT_ID_FILE")
         self.imdb_data_file = self._get_required_env("FILIMO_IMDB_DATA_FILE")
         
-        self.sftp_host = self._get_required_env("FILIMO_SFTP_HOST")
-        self.sftp_port = int(self._get_required_env("FILIMO_SFTP_PORT"))
-        self.sftp_username = self._get_required_env("FILIMO_SFTP_USER")
-        self.sftp_password = self._get_required_env("FILIMO_SFTP_PASS")
-        self.sftp_remote_dir = self._get_required_env("FILIMO_SFTP_REMOTE_DIR")
+        # Check if SFTP is enabled
+        self.sftp_enabled = self._get_bool_env("FILIMO_SFTP_ENABLED", False)
+        if self.sftp_enabled:
+            self.sftp_host = self._get_required_env("FILIMO_SFTP_HOST")
+            self.sftp_port = int(self._get_required_env("FILIMO_SFTP_PORT"))
+            self.sftp_username = self._get_required_env("FILIMO_SFTP_USER")
+            self.sftp_password = self._get_required_env("FILIMO_SFTP_PASS")
+            self.sftp_remote_dir = self._get_required_env("FILIMO_SFTP_REMOTE_DIR")
         
-        self.metabase_api_url = self._get_required_env("FILIMO_API_URL")
-        self.api_key = self._get_required_env("FILIMO_API_KEY")
+        # Check if API is enabled
+        self.api_enabled = self._get_bool_env("FILIMO_API_ENABLED", False)
+        if self.api_enabled:
+            self.metabase_api_url = self._get_required_env("FILIMO_API_URL")
+            self.api_key = self._get_required_env("FILIMO_API_KEY")
     
     def _get_required_env(self, var_name: str) -> str:
         """Get required environment variable or raise error if missing"""
@@ -60,6 +67,16 @@ class FilimoSourceConfig:
         if value is None:
             raise ValueError(f"Required environment variable '{var_name}' is not set. Please check your .env.filimo file.")
         return value
+    
+    def _get_bool_env(self, var_name: str, default: bool = False) -> bool:
+        """Get boolean environment variable with default value"""
+        value = os.getenv(var_name, "").lower()
+        if value in ("true", "1", "yes", "on"):
+            return True
+        elif value in ("false", "0", "no", "off", ""):
+            return default
+        else:
+            raise ValueError(f"Invalid boolean value for '{var_name}': {value}. Use true/false, 1/0, yes/no, or on/off.")
 
 
 @dataclass
@@ -118,10 +135,14 @@ class FilimoOutputConfig:
         return base_dir / self.intermediate_series_file
     
     def get_final_movies_path(self, base_dir: Path) -> Path:
-        return base_dir / self.final_movies_file
+        results_dir = base_dir.parent / "results"
+        results_dir.mkdir(exist_ok=True)
+        return results_dir / self.final_movies_file
     
     def get_final_series_path(self, base_dir: Path) -> Path:
-        return base_dir / self.final_series_file
+        results_dir = base_dir.parent / "results"
+        results_dir.mkdir(exist_ok=True)
+        return results_dir / self.final_series_file
 
 
 @dataclass

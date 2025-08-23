@@ -27,13 +27,21 @@ class FilimoPipeline(BasePipeline):
     
     def _initialize_components(self):
         """Initialize Filimo-specific components"""
-        # Initialize extractors
+        # Initialize multiple extractors for different data sources
+        
+        # SFTP extractor for filimo_data (if enabled)
         if self.config.source.sftp_enabled:
-            self.extractors["primary"] = FilimoSFTPExtractor(self.config, self.metrics)
-        elif self.config.source.api_enabled:
-            self.extractors["primary"] = FilimoAPIExtractor(self.config, self.metrics)
-        else:
-            self.extractors["primary"] = FilimoCSVExtractor(self.config, self.metrics)
+            self.extractors["sftp"] = FilimoSFTPExtractor(self.config, self.metrics)
+            self.logger.info("🌐 SFTP extractor initialized for filimo_data")
+        
+        # API extractor for imported_before (if enabled)
+        if self.config.source.api_enabled:
+            self.extractors["api"] = FilimoAPIExtractor(self.config, self.metrics)
+            self.logger.info("🔗 API extractor initialized for imported_before")
+        
+        # CSV extractor as fallback and for other sources
+        self.extractors["csv"] = FilimoCSVExtractor(self.config, self.metrics)
+        self.logger.info("📁 CSV extractor initialized for fallback and other sources")
         
         # Initialize transformers
         self.transformers["duplicate_removal"] = FilimoDuplicateRemovalTransformer(self.config, self.metrics)
@@ -52,36 +60,50 @@ class FilimoPipeline(BasePipeline):
         self.validators["data"] = FilimoDataValidator(self.config, self.metrics)
         self.validators["quality"] = FilimoQualityValidator(self.config, self.metrics)
     
+    def _get_extractor_for_source(self, source_name: str):
+        """Get the appropriate extractor for a data source"""
+        if source_name == "filimo_data" and "sftp" in self.extractors:
+            return self.extractors["sftp"]
+        elif source_name == "imported_before" and "api" in self.extractors:
+            return self.extractors["api"]
+        else:
+            return self.extractors["csv"]
+    
     def extract_phase(self) -> Dict[str, pd.DataFrame]:
-        """Extract phase for Filimo data"""
+        """Extract phase for Filimo data with source-specific extractors"""
         self.logger.info("🔄 Starting Filimo EXTRACT phase")
         
         extracted_data = {}
-        extractor = self.extractors["primary"]
         
-        # Required sources
+        # Required sources with specific extractor assignments
         required_sources = ["filimo_data", "imported_before", "imdb_data"]
         for source_name in required_sources:
+            extractor = self._get_extractor_for_source(source_name)
+            extractor_type = "SFTP" if extractor == self.extractors.get("sftp") else \
+                           "API" if extractor == self.extractors.get("api") else "CSV"
+            
             try:
+                self.logger.info(f"🔄 Extracting {source_name} using {extractor_type} extractor")
                 df = extractor.extract(source_name)
                 extracted_data[source_name] = df
-                self.logger.info(f"✅ Extracted {len(df)} rows from {source_name}")
+                self.logger.info(f"✅ Extracted {len(df)} rows from {source_name} via {extractor_type}")
                 
             except Exception as e:
-                error_msg = f"Failed to extract {source_name}: {e}"
+                error_msg = f"Failed to extract {source_name} via {extractor_type}: {e}"
                 self.logger.error(error_msg)
                 self.metrics.record_error(error_msg, "extract")
                 
                 if not self.config.continue_on_error:
                     raise
         
-        # Optional sources
+        # Optional sources (always use CSV extractor)
         optional_sources = ["movie_uid_exclusions", "parent_id_exclusions"]
+        csv_extractor = self.extractors["csv"]
         for source_name in optional_sources:
             try:
-                df = extractor.extract(source_name)
+                df = csv_extractor.extract(source_name)
                 extracted_data[source_name] = df
-                self.logger.info(f"✅ Extracted {len(df)} rows from {source_name}")
+                self.logger.info(f"✅ Extracted {len(df)} rows from {source_name} via CSV")
             except Exception as e:
                 self.logger.warning(f"Optional source {source_name} not available: {e}")
                 extracted_data[source_name] = None
