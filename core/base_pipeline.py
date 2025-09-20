@@ -114,8 +114,29 @@ class BaseMetrics:
     def save_metrics(self):
         """Save metrics to file"""
         if self.config.save_metrics:
+            # Convert numpy types to native Python types for JSON serialization
+            serializable_metrics = self._convert_to_serializable(self.metrics)
             with open(self.config.metrics_path, 'w') as f:
-                json.dump(self.metrics, f, indent=2, default=str)
+                json.dump(serializable_metrics, f, indent=2, default=str)
+    
+    def _convert_to_serializable(self, obj):
+        """Convert numpy types to native Python types for JSON serialization"""
+        import numpy as np
+        
+        if isinstance(obj, dict):
+            return {key: self._convert_to_serializable(value) for key, value in obj.items()}
+        elif isinstance(obj, list):
+            return [self._convert_to_serializable(item) for item in obj]
+        elif isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif hasattr(obj, 'item'):  # For other numpy scalar types
+            return obj.item()
+        else:
+            return obj
     
     def get_summary(self) -> Dict[str, Any]:
         """Get metrics summary"""

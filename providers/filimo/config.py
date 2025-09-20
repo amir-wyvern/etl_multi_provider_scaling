@@ -124,6 +124,9 @@ class FilimoOutputConfig:
     final_movies_file: str = "filimo_final_movies.csv"
     final_series_file: str = "filimo_final_series.csv"
     
+    enrich_movies_with_db_file: str = "filimo_enrich_movies_with_db.csv"
+    enrich_series_with_db_file: str = "filimo_enrich_series_with_db.csv"
+    
     # File format options
     csv_na_rep: str = "NAN"
     csv_index: bool = False
@@ -139,6 +142,16 @@ class FilimoOutputConfig:
         results_dir.mkdir(exist_ok=True)
         return results_dir / self.final_movies_file
     
+    def get_enriched_movies_with_db_path(self, base_dir: Path) -> Path:
+        results_dir = base_dir.parent / "results"
+        results_dir.mkdir(exist_ok=True)
+        return results_dir / self.enrich_movies_with_db_file
+    
+    def get_final_series_with_db_path(self, base_dir: Path) -> Path:
+        results_dir = base_dir.parent / "results"
+        results_dir.mkdir(exist_ok=True)
+        return results_dir / self.enrich_series_with_db_file
+
     def get_final_series_path(self, base_dir: Path) -> Path:
         results_dir = base_dir.parent / "results"
         results_dir.mkdir(exist_ok=True)

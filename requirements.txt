@@ -1,44 +1,40 @@
-# Core ETL Framework Dependencies
-pandas>=2.0.0
-requests>=2.28.0
-python-dotenv>=1.0.0
-
-# Data Processing & Validation
-numpy>=1.24.0
-typing-extensions>=4.0.0
-
-# File Handling & I/O
-pathlib2>=2.3.0; python_version<"3.6"
-
-# Optional: SFTP Support (for Filimo provider)
+bcrypt==4.3.0
+cachetools==5.5.2
+certifi==2025.8.3
+cffi==1.17.1
+charset-normalizer==3.4.3
+cryptography==45.0.6
+google-api-core==2.25.1
+google-api-python-client==2.178.0
+google-auth==2.40.3
+google-auth-httplib2==0.2.0
+google-auth-oauthlib==1.2.2
+googleapis-common-protos==1.70.0
+gspread==6.2.1
+gspread-dataframe==4.0.0
+httplib2==0.22.0
+idna==3.10
+invoke==2.2.0
+numpy==2.2.6
+oauthlib==3.3.1
+pandas==2.3.1
+paramiko==2.12.0
+proto-plus==1.26.1
+protobuf==6.32.0
+pyasn1==0.6.1
+pyasn1_modules==0.4.2
+pycparser==2.22
+PyNaCl==1.5.0
+pyparsing==3.2.3
 pysftp==0.2.9
-paramiko<3.0
-
-# Optional: Google Services (for specific providers)
-gspread>=6.0.0
-gspread-dataframe>=4.0.0
-google-auth>=2.20.0
-google-api-python-client>=2.100.0
-
-# Optional: Additional Data Formats
-openpyxl>=3.0.0
-xlsxwriter>=3.0.0
-
-# Optional: API Framework (for future enhancements)
-fastapi>=0.100.0
-uvicorn>=0.20.0
-
-# Optional: Advanced Analytics
-scipy>=1.10.0
-scikit-learn>=1.3.0
-
-# Development Dependencies (optional)
-pytest>=7.0.0
-pytest-cov>=4.0.0
-black>=23.0.0
-flake8>=6.0.0
-mypy>=1.0.0
-
-# Documentation (optional)
-mkdocs>=1.5.0
-mkdocs-material>=9.0.0
+python-dateutil==2.9.0.post0
+python-dotenv==1.1.1
+pytz==2025.2
+requests==2.31.0
+requests-oauthlib==2.0.0
+rsa==4.9.1
+six==1.17.0
+tzdata==2025.2
+uritemplate==4.2.0
+urllib3==2.5.0
+openai==1.51.0
