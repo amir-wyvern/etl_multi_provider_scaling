@@ -30,33 +30,43 @@ class MatchEngine:
         """
         try:
             content_id = content['provider'].get('id', 'unknown')
+            provider_imdb_id = content['provider'].get('imdb_id')
+            if provider_imdb_id == 'NAN':
+                provider_imdb_id = None
             
             # Check if database record exists and has IMDb ID
             if 'database' in content and content['database'].get('imdb_id'):
                 imdb_id = content['database']['imdb_id']
+                
+                imdb_id = imdb_id.zfill(7)
+
                 logger.debug(f"Using database IMDb ID {imdb_id} for content {content_id}")
-                return imdb_id
+                return imdb_id, "database"
             
             # Check if provider has IMDb ID and it's verified by IMDb API
-            provider_imdb_id = content['provider'].get('imdb_id')
-            if provider_imdb_id:
-                # Check if IMDb API verified this ID
-                if 'imdb' in content and content['imdb'].get('imdb_id') == provider_imdb_id:
-                    logger.debug(f"Using provider IMDb ID {provider_imdb_id} for content {content_id}")
-                    return provider_imdb_id
-                else:
-                    # This is the "wrong condition" from flowchart
-                    error_msg = f"Provider IMDb ID {provider_imdb_id} not verified by IMDb API for content {content_id}"
-                    logger.error(error_msg)
-                    raise ValueError(error_msg)
+
+            elif 'imdb' in content and content['imdb'].get('imdb_id') == provider_imdb_id:
+                logger.debug(f"Using Provider IMDb ID {provider_imdb_id} for content {content_id}")
+                return provider_imdb_id, "provider"
             
-            # If no valid IMDb ID found, return None (will be converted to NaN in DataFrame)
-            logger.debug(f"No valid IMDb ID found for content {content_id}")
-            return None
+            elif  'imdb' in content and content['provider'].get('imdb_id') is None :
+                logger.debug(f"Using IMDb API IMDb ID {content['imdb'].get('imdb_id')} for content {content_id}")
+                return content['imdb'].get('imdb_id'), "imdb_api"
+            
+            elif provider_imdb_id and 'imdb' not in content:
+                error_msg = f"IMDb ID not verified by IMDb API for content {content_id}"
+                logger.error(error_msg)
+                raise ValueError(error_msg)
+            
+            else:
+                # If no valid IMDb ID found, return None (will be converted to NaN in DataFrame)
+                logger.debug(f"No valid IMDb ID found for content {content_id}")
+                return None, None
+                # This is the "wrong condition" from flowchart
             
         except Exception as e:
             logger.error(f"Error processing content {content['provider'].get('id', 'unknown')}: {str(e)}")
-            return None
+            return None, None
 
     def process_content(self) -> pd.DataFrame:
         """Process all content and create output DataFrame with required structure"""
@@ -66,10 +76,11 @@ class MatchEngine:
         for item in self.enrichment_data['data']:
             try:
                 provider_data = item['provider']
-                
+                imdb_id, imdb_id_source = self.select_best_imdb_id(item)
                 record = {
                     'Id': provider_data.get('id'),
-                    'imdbId': self.select_best_imdb_id(item),
+                    'imdbId': imdb_id,
+                    'imdbIdSource': imdb_id_source,
                     'title': provider_data.get('title'),
                     'titleEn': provider_data.get('title_en'),
                     'episodeNo': provider_data.get('episode_no'),
